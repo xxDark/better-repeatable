@@ -1,0 +1,13 @@
+java {
+    toolchain {
+        languageVersion = JavaLanguageVersion.of(8)
+    }
+}
+
+dependencies {
+    implementation asm
+    def home = javaToolchains.compilerFor {
+        languageVersion = JavaLanguageVersion.of(8)
+    }.get().metadata.installationPath.asFile
+    compileOnly files("$home/lib/tools.jar")
+}

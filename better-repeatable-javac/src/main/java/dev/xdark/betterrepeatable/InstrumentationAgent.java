@@ -1,8 +1,5 @@
 package dev.xdark.betterrepeatable;
 
-import com.sun.codemodel.internal.JOp;
-
-import javax.swing.*;
 import java.lang.instrument.Instrumentation;
 
 public final class InstrumentationAgent {

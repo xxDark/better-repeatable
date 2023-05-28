@@ -5,7 +5,18 @@ allprojects {
 
 subprojects {
     apply plugin: 'java'
+
     ext {
         asm = 'org.ow2.asm:asm:9.4'
+    }
+
+    repositories {
+        mavenCentral()
+    }
+
+    configurations {
+        shade
+        implementation.extendsFrom shade
+        shade.transitive = false
     }
 }

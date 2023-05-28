@@ -2,6 +2,7 @@ package dev.xdark.betterrepeatable.java8;
 
 import com.sun.tools.javac.code.Attribute;
 import com.sun.tools.javac.code.Symbol;
+import com.sun.tools.javac.code.SymbolMetadata;
 import com.sun.tools.javac.comp.Annotate;
 import com.sun.tools.javac.util.JCDiagnostic;
 import com.sun.tools.javac.util.List;
@@ -18,7 +19,8 @@ public final class SymbolMetadataPatch {
 	}
 
 	// Copy from SymbolMetadata#getAttributesForCompletion
-	public static <T extends Attribute.Compound> List<T> getAttributesForCompletion(Annotate.AnnotateRepeatedContext<T> ctx) {
+	public static <T extends Attribute.Compound> List<T> getAttributesForCompletion(SymbolMetadata metadata, Annotate.AnnotateRepeatedContext<T> ctx) {
+		// Symbol symbol = SymbolsAccess.getSymbol(metadata);
 		List<T> buf = List.nil();
 		boolean noRepeatable = true;
 		loop:

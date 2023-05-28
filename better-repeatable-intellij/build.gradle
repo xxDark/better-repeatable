@@ -1,0 +1,39 @@
+buildscript {
+    repositories {
+        maven {
+            url = uri('https://plugins.gradle.org/m2/')
+        }
+    }
+    dependencies {
+        classpath('org.jetbrains.intellij.plugins:gradle-intellij-plugin:1.13.3')
+    }
+}
+
+java {
+    toolchain {
+        languageVersion = JavaLanguageVersion.of(11)
+    }
+}
+
+apply plugin: 'org.jetbrains.intellij'
+
+intellij {
+    version.set('2022.2.4')
+    type.set('IC')
+    plugins.add('com.intellij.java')
+}
+
+tasks {
+    patchPluginXml {
+        sinceBuild.set('222')
+        untilBuild.set('232.*')
+    }
+}
+
+dependencies {
+    shade project(':better-repeatable-javac')
+}
+
+jar {
+    from { configurations.shade.collect { zipTree(it) } }
+}

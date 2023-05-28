@@ -1,15 +1,23 @@
-repositories {
-    mavenCentral()
+java {
+    toolchain {
+        languageVersion = JavaLanguageVersion.of(8)
+    }
 }
 
+// Use JDK 8 to build plugin code
 dependencies {
-    implementation asm
-    compileOnly files("${System.getProperty('java.home')}/../lib/tools.jar")
+    shade project(':better-repeatable-javac:java8')
+    def home = javaToolchains.compilerFor {
+        languageVersion = JavaLanguageVersion.of(8)
+    }.get().metadata.installationPath.asFile
+    compileOnly files("$home/lib/tools.jar")
 }
 
 jar {
+    from { configurations.shade.collect { zipTree(it) } }
+
     manifest {
-        attributes  'Can-Retransform-Classes': 'true',
-        'Agent-Class': 'dev.xdark.betterrepeatable.InstrumentationAgent'
+        attributes 'Can-Retransform-Classes': 'true',
+                'Agent-Class': 'dev.xdark.betterrepeatable.InstrumentationAgent'
     }
 }

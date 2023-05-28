@@ -2,9 +2,6 @@ package dev.xdark.betterrepeatable;
 
 import com.sun.source.util.JavacTask;
 import com.sun.source.util.Plugin;
-import dev.xdark.betterrepeatable.java8.Initializer;
-
-import javax.swing.*;
 
 public final class JavacPlugin implements Plugin {
 	private static final Object INIT_LOCK = new Object();
@@ -23,7 +20,7 @@ public final class JavacPlugin implements Plugin {
 				Class.forName("java.lang.Module");
 				throw new UnsupportedOperationException("Not yet supported on Java 9+, internals changed");
 			} catch (ClassNotFoundException ignored) {
-				Initializer.init();
+				dev.xdark.betterrepeatable.java8.Initializer.init();
 				initialized = true;
 			}
 		}

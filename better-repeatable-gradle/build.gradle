@@ -2,13 +2,10 @@ plugins {
     id 'java-gradle-plugin'
 }
 
-repositories {
-    mavenCentral()
-}
-
-configurations {
-    shade
-    implementation.extendsFrom shade
+java {
+    toolchain {
+        languageVersion = JavaLanguageVersion.of(8)
+    }
 }
 
 dependencies {

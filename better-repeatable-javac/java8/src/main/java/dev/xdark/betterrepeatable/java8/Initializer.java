@@ -22,7 +22,6 @@ import java.lang.management.ManagementFactory;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.net.URISyntaxException;
-import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.security.ProtectionDomain;
 
@@ -141,8 +140,9 @@ public final class Initializer {
 										@Override
 										public void visitCode() {
 											super.visitCode();
+											visitVarInsn(ALOAD, 0);
 											visitVarInsn(ALOAD, 1);
-											visitMethodInsn(INVOKESTATIC, "dev/xdark/betterrepeatable/java8/SymbolMetadataPatch", "getAttributesForCompletion", "(Lcom/sun/tools/javac/comp/Annotate$AnnotateRepeatedContext;)Lcom/sun/tools/javac/util/List;", false);
+											visitMethodInsn(INVOKESTATIC, "dev/xdark/betterrepeatable/java8/SymbolMetadataPatch", "getAttributesForCompletion", "(Lcom/sun/tools/javac/code/SymbolMetadata;Lcom/sun/tools/javac/comp/Annotate$AnnotateRepeatedContext;)Lcom/sun/tools/javac/util/List;", false);
 											Label skip = new Label();
 											visitInsn(DUP);
 											visitJumpInsn(IFNULL, skip);
@@ -168,7 +168,7 @@ public final class Initializer {
 			instrumentation.retransformClasses(SymbolMetadata.class);
 		} catch (UnmodifiableClassException e) {
 			throw new IllegalStateException("Cannot patch SymbolMetadata", e);
-		} catch (InternalError e) {
+		} catch (InternalError | VerifyError e) {
 			throw new RuntimeException("Failed to retransform SymbolMetadata, SymbolMetadataPatch did not load?", e);
 		}
 	}

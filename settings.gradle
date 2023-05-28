@@ -2,4 +2,7 @@ rootProject.name = 'better-repeatable'
 include 'better-repeatable-api'
 include 'better-repeatable-javac'
 include 'better-repeatable-gradle'
+include 'better-repeatable-intellij'
+include 'better-repeatable-javac:java8'
+findProject(':better-repeatable-javac:java8')?.name = 'java8'
 
