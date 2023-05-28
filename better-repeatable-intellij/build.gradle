@@ -31,7 +31,8 @@ tasks {
 }
 
 dependencies {
-    // See comment in APBuildManagerListener on why this is commented out.
+    // For some odd reason, IntelliJ does not provide CodeSource
+    // for plugin ProtectionDomain... I'm unsure if it is dev environment issue.
     // shade project(':better-repeatable-javac')
     // shade project(':better-repeatable-javac:java8')
     shade project(':better-repeatable-agent')
