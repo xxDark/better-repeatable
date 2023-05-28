@@ -31,7 +31,11 @@ tasks {
 }
 
 dependencies {
-    shade project(':better-repeatable-javac')
+    // See comment in APBuildManagerListener on why this is commented out.
+    // shade project(':better-repeatable-javac')
+    // shade project(':better-repeatable-javac:java8')
+    shade project(':better-repeatable-agent')
+    shade asm
 }
 
 jar {

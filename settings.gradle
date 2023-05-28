@@ -5,4 +5,5 @@ include 'better-repeatable-gradle'
 include 'better-repeatable-intellij'
 include 'better-repeatable-javac:java8'
 findProject(':better-repeatable-javac:java8')?.name = 'java8'
+include 'better-repeatable-agent'
 

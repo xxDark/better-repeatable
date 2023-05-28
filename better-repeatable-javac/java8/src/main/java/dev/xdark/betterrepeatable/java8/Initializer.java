@@ -1,10 +1,7 @@
 package dev.xdark.betterrepeatable.java8;
 
-import com.sun.tools.attach.AgentInitializationException;
-import com.sun.tools.attach.AgentLoadException;
-import com.sun.tools.attach.AttachNotSupportedException;
-import com.sun.tools.attach.VirtualMachine;
 import com.sun.tools.javac.code.SymbolMetadata;
+import dev.xdark.betterrepeatable.InstrumentationProvider;
 import org.objectweb.asm.ClassReader;
 import org.objectweb.asm.ClassVisitor;
 import org.objectweb.asm.ClassWriter;
@@ -18,11 +15,7 @@ import java.lang.instrument.ClassFileTransformer;
 import java.lang.instrument.IllegalClassFormatException;
 import java.lang.instrument.Instrumentation;
 import java.lang.instrument.UnmodifiableClassException;
-import java.lang.management.ManagementFactory;
-import java.lang.reflect.Field;
 import java.lang.reflect.Method;
-import java.net.URISyntaxException;
-import java.nio.file.Paths;
 import java.security.ProtectionDomain;
 
 import static org.objectweb.asm.Opcodes.*;
@@ -30,92 +23,29 @@ import static org.objectweb.asm.Opcodes.*;
 public final class Initializer {
 
 	public static void init() {
-		ClassLoader scl = ClassLoader.getSystemClassLoader();
-		Class<?> agentClass;
-		try {
-			Method m = ClassLoader.class.getDeclaredMethod("findLoadedClass", String.class);
-			m.setAccessible(true);
-			agentClass = (Class<?>) m.invoke(scl, "dev.xdark.betterrepeatable.InstrumentationAgent");
-		} catch (ReflectiveOperationException ex) {
-			agentClass = null;
-		}
-		if (agentClass != null) {
-			return;
-		}
-		String pid = ManagementFactory.getRuntimeMXBean().getName().split("@")[0];
-		VirtualMachine vm;
-		try {
-			vm = VirtualMachine.attach(pid);
-		} catch (AttachNotSupportedException e) {
-			throw new RuntimeException("Failed to attach to VM", e);
-		} catch (IOException e) {
-			throw new RuntimeException("I/O error", e);
-		}
-		try {
-			vm.loadAgent(Paths.get(Initializer.class.getProtectionDomain().getCodeSource().getLocation().toURI()).toString(), "");
-		} catch (AgentLoadException e) {
-			throw new RuntimeException("Failed to load agent", e);
-		} catch (IOException | URISyntaxException e) {
-			throw new RuntimeException("I/O error", e);
-		} catch (AgentInitializationException e) {
-			throw new RuntimeException("Failed to initialize agent", e);
-		} finally {
-			try {
-				vm.detach();
-			} catch (IOException ignored) {
-			}
-		}
-		try {
-			agentClass = Class.forName("dev.xdark.betterrepeatable.InstrumentationAgent", false, scl);
-		} catch (ClassNotFoundException e) {
-			throw new RuntimeException("Failed to load agent class", e);
-		}
-		Object lock;
-		{
-			try {
-				Field lockField = agentClass.getDeclaredField("LOCK");
-				lockField.setAccessible(true);
-				lock = lockField.get(null);
-			} catch (ReflectiveOperationException e) {
-				throw new RuntimeException("Failed to get agent lock field", e);
-			}
-		}
-
-		Instrumentation instrumentation;
-		try {
-			Field f = agentClass.getDeclaredField("instrumentation");
-			f.setAccessible(true);
-			Instrumentation probe;
-			synchronized (lock) {
-				probe = (Instrumentation) f.get(null);
-				if (probe == null) {
-					try {
-						lock.wait();
-					} catch (InterruptedException e) {
-						Thread.currentThread().interrupt();
-						throw new IllegalStateException("Thread interrupted");
-					}
-					probe = (Instrumentation) f.get(null);
-				}
-			}
-			instrumentation = probe;
-		} catch (ReflectiveOperationException e) {
-			throw new RuntimeException("Failed to get instrumentation", e);
-		}
 		ClassLoader compilerClassLoader = SymbolMetadata.class.getClassLoader();
-		try (InputStream in = Initializer.class.getClassLoader().getResourceAsStream("dev/xdark/betterrepeatable/java8/SymbolMetadataPatch.class")) {
-			ByteArrayOutputStream baos = new ByteArrayOutputStream();
-			byte[] buf = new byte[8192];
-			int r;
-			while ((r = in.read(buf)) != -1) {
-				baos.write(buf, 0, r);
+		// Bulletproof (I hope) hack to not do transformation
+		// multiple times if javac classes are loaded
+		// from the same class loader, but plugin classes
+		// from another.
+		try {
+			Class.forName("dev.xdark.betterrepeatable.java8.LoadStub", false, compilerClassLoader);
+			return;
+		} catch (ClassNotFoundException ignored) {
+		}
+		Instrumentation instrumentation = InstrumentationProvider.get();
+		ClassLoader pluginClassLoader = Initializer.class.getClassLoader();
+		try {
+			compilerClassLoader.loadClass("dev.xdark.betterrepeatable.SymbolMetadataPatch");
+		} catch (ClassNotFoundException ignored) {
+			try (InputStream in = pluginClassLoader.getResourceAsStream("dev/xdark/betterrepeatable/java8/SymbolMetadataPatch.class")) {
+				byte[] bytes = readStreamBytes(in);
+				Method m = ClassLoader.class.getDeclaredMethod("defineClass", String.class, byte[].class, int.class, int.class);
+				m.setAccessible(true);
+				m.invoke(compilerClassLoader, null, bytes, 0, bytes.length);
+			} catch (ReflectiveOperationException | IOException ex) {
+				throw new RuntimeException("Unable to load SymbolMetadataPatch", ex);
 			}
-			byte[] bytes = baos.toByteArray();
-			Method m = ClassLoader.class.getDeclaredMethod("defineClass", String.class, byte[].class, int.class, int.class);
-			m.setAccessible(true);
-			m.invoke(compilerClassLoader, null, bytes, 0, bytes.length);
-		} catch (ReflectiveOperationException | IOException ex) {
-			throw new RuntimeException("Unable to load SymbolMetadataPatch", ex);
 		}
 		ClassFileTransformer cf = new ClassFileTransformer() {
 			@Override
@@ -171,5 +101,23 @@ public final class Initializer {
 		} catch (InternalError | VerifyError e) {
 			throw new RuntimeException("Failed to retransform SymbolMetadata, SymbolMetadataPatch did not load?", e);
 		}
+		try (InputStream in = pluginClassLoader.getResourceAsStream("dev/xdark/betterrepeatable/java8/LoadStub.class")) {
+			byte[] bytes = readStreamBytes(in);
+			Method m = ClassLoader.class.getDeclaredMethod("defineClass", String.class, byte[].class, int.class, int.class);
+			m.setAccessible(true);
+			m.invoke(compilerClassLoader, null, bytes, 0, bytes.length);
+		} catch (ReflectiveOperationException | IOException ignored) {
+			// Ugh...
+		}
+	}
+
+	private static byte[] readStreamBytes(InputStream in) throws IOException {
+		ByteArrayOutputStream baos = new ByteArrayOutputStream();
+		byte[] buf = new byte[8192];
+		int r;
+		while ((r = in.read(buf)) != -1) {
+			baos.write(buf, 0, r);
+		}
+		return baos.toByteArray();
 	}
 }

@@ -12,12 +12,3 @@ dependencies {
     }.get().metadata.installationPath.asFile
     compileOnly files("$home/lib/tools.jar")
 }
-
-jar {
-    from { configurations.shade.collect { zipTree(it) } }
-
-    manifest {
-        attributes 'Can-Retransform-Classes': 'true',
-                'Agent-Class': 'dev.xdark.betterrepeatable.InstrumentationAgent'
-    }
-}

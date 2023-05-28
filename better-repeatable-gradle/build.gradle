@@ -10,19 +10,13 @@ java {
 
 dependencies {
     shade asm
+    shade project(':better-repeatable-agent')
     shade project(':better-repeatable-javac')
+    shade project(':better-repeatable-javac:java8')
 }
 
 jar {
     from { configurations.shade.collect { zipTree(it) } }
-}
-
-// TODO move me
-jar {
-    manifest {
-        attributes  'Can-Retransform-Classes': 'true',
-                'Agent-Class': 'dev.xdark.betterrepeatable.InstrumentationAgent'
-    }
 }
 
 gradlePlugin {

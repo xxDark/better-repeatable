@@ -4,11 +4,18 @@ java {
     }
 }
 
+// Use JDK 8 to build plugin code
 dependencies {
-    implementation asm
     def home = javaToolchains.compilerFor {
         languageVersion = JavaLanguageVersion.of(8)
     }.get().metadata.installationPath.asFile
     compileOnly files("$home/lib/tools.jar")
-    shade project(':better-repeatable-agent')
+    implementation asm
+}
+
+jar {
+    manifest {
+        attributes 'Can-Retransform-Classes': 'true',
+                'Agent-Class': 'dev.xdark.betterrepeatable.InstrumentationAgent'
+    }
 }
