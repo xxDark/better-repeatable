@@ -1,0 +1,5 @@
+rootProject.name = 'better-repeatable'
+include 'better-repeatable-api'
+include 'better-repeatable-javac'
+include 'better-repeatable-gradle'
+

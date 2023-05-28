@@ -1,0 +1,38 @@
+plugins {
+    id 'java-gradle-plugin'
+}
+
+repositories {
+    mavenCentral()
+}
+
+configurations {
+    shade
+    implementation.extendsFrom shade
+}
+
+dependencies {
+    shade asm
+    shade project(':better-repeatable-javac')
+}
+
+jar {
+    from { configurations.shade.collect { zipTree(it) } }
+}
+
+// TODO move me
+jar {
+    manifest {
+        attributes  'Can-Retransform-Classes': 'true',
+                'Agent-Class': 'dev.xdark.betterrepeatable.InstrumentationAgent'
+    }
+}
+
+gradlePlugin {
+    plugins {
+        betterRepeatable {
+            id = 'dev.xdark.betterrepeatable'
+            implementationClass = 'dev.xdark.betterrepeatable.GradlePlugin'
+        }
+    }
+}

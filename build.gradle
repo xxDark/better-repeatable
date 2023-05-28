@@ -1,0 +1,11 @@
+allprojects {
+    group 'dev.xdark'
+    version '1.0'
+}
+
+subprojects {
+    apply plugin: 'java'
+    ext {
+        asm = 'org.ow2.asm:asm:9.4'
+    }
+}
