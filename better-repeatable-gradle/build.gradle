@@ -1,5 +1,7 @@
 plugins {
     id 'java-gradle-plugin'
+    id 'com.gradle.plugin-publish' version '1.2.0'
+    id 'signing'
 }
 
 java {
@@ -20,10 +22,15 @@ jar {
 }
 
 gradlePlugin {
+    website.set('https://github.com/xxDark/better-repeatable')
+    vcsUrl.set('https://github.com/xxDark/better-repeatable')
     plugins {
         betterRepeatable {
             id = 'dev.xdark.betterrepeatable'
             implementationClass = 'dev.xdark.betterrepeatable.GradlePlugin'
+            displayName = 'BetterRepeatable Plugin'
+            description = 'Integration for compiler changes made by better-repeatable'
+            tags.set(['annotations', 'javac'])
         }
     }
 }
