@@ -25,7 +25,7 @@ public final class CompilerPatch extends JCTree.Visitor {
 	private CompilerPatch() {
 	}
 
-	public static synchronized <T extends Attribute.Compound> boolean annotateNow(
+	public static <T extends Attribute.Compound> boolean annotateNow(
 			Annotate annotate,
 			Symbol toAnnotate,
 			List<JCTree.JCAnnotation> withAnnotations,
