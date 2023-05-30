@@ -23,8 +23,8 @@ public final class JavacPlugin implements Plugin {
 				invokeInit("java11");
 			} catch (ClassNotFoundException ignored) {
 				invokeInit("java8");
-				initialized = true;
 			}
+			initialized = true;
 		}
 	}
 
