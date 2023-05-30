@@ -14,7 +14,11 @@
          Simple HTML elements (text formatting, paragraphs, and lists) can be added inside of <![CDATA[ ]]> tag.
          Guidelines: https://plugins.jetbrains.com/docs/marketplace/plugin-overview-page.html#plugin-description -->
     <description><![CDATA[
-    IntelliJ plugin to support compiler changes made by better-repeatable
+    IntelliJ plugin to support compiler changes made by <a href="https://github.com/xxDark/better-repeatable">better-repeatable</a>.<br>
+    bette-repeatable is an extension for javac that allows developers to keep annotations in order in which
+    they are defined in the source code.<br>
+    Extension provides (almost) drop-in replacement for Java's @Repeatable annotation.<br>
+    Currently, only Gradle is supported.
   ]]></description>
 
     <!-- Product and plugin compatibility requirements.
