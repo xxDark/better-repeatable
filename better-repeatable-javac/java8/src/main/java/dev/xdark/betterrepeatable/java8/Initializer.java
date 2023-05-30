@@ -36,7 +36,7 @@ public final class Initializer {
 		Instrumentation instrumentation = InstrumentationProvider.get();
 		ClassLoader pluginClassLoader = Initializer.class.getClassLoader();
 		try {
-			compilerClassLoader.loadClass("dev.xdark.betterrepeatable.SymbolMetadataPatch");
+			compilerClassLoader.loadClass("dev.xdark.betterrepeatable.java8.SymbolMetadataPatch");
 		} catch (ClassNotFoundException ignored) {
 			try (InputStream in = pluginClassLoader.getResourceAsStream("dev/xdark/betterrepeatable/java8/SymbolMetadataPatch.class")) {
 				byte[] bytes = readStreamBytes(in);

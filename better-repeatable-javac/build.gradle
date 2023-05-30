@@ -6,9 +6,29 @@ java {
 
 // Use JDK 8 to build plugin code
 dependencies {
-    shade project(':better-repeatable-javac:java8')
+    shade project(':better-repeatable-agent')
+    shade asm
     def home = javaToolchains.compilerFor {
         languageVersion = JavaLanguageVersion.of(8)
     }.get().metadata.installationPath.asFile
     compileOnly files("$home/lib/tools.jar")
+
+    // TODO: I did not find any other better way to do this.
+    // Gradle outright refuses to resolve projects with higher toolchain versions
+    // with all kind of configurations I tried.
+    def compiler_projects = [
+            project(':better-repeatable-javac:java8'),
+            project(':better-repeatable-javac:java11')
+    ]
+    compiler_projects.each {
+        Jar task = it.tasks.jar
+        jar.dependsOn(task)
+        shade files(task.archiveFile.get().asFile)
+    }
+}
+
+jar {
+    from {
+        configurations.shade.collect { zipTree(it) }
+    }
 }

@@ -1,0 +1,22 @@
+java {
+    toolchain {
+        languageVersion = JavaLanguageVersion.of(11)
+    }
+}
+
+tasks.withType(JavaCompile) {
+    def compilerArgs = it.options.compilerArgs
+    [
+            'com.sun.tools.javac.code',
+            'com.sun.tools.javac.comp',
+            'com.sun.tools.javac.tree',
+            'com.sun.tools.javac.util'
+    ].each {
+        compilerArgs.add("--add-exports=jdk.compiler/$it=ALL-UNNAMED")
+    }
+}
+
+dependencies {
+    compileOnly project(':better-repeatable-agent')
+    compileOnly asm
+}

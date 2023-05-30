@@ -5,10 +5,10 @@ java {
 }
 
 dependencies {
-    implementation asm
+    compileOnly project(':better-repeatable-agent')
+    compileOnly asm
     def home = javaToolchains.compilerFor {
         languageVersion = JavaLanguageVersion.of(8)
     }.get().metadata.installationPath.asFile
     compileOnly files("$home/lib/tools.jar")
-    shade project(':better-repeatable-agent')
 }

@@ -19,4 +19,10 @@ subprojects {
         implementation.extendsFrom shade
         shade.transitive = false
     }
+
+    configurations {
+        shadeOnly
+        compileOnly.extendsFrom shadeOnly
+        shadeOnly.transitive = false
+    }
 }

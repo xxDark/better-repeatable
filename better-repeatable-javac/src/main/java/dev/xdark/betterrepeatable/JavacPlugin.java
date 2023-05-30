@@ -3,6 +3,8 @@ package dev.xdark.betterrepeatable;
 import com.sun.source.util.JavacTask;
 import com.sun.source.util.Plugin;
 
+import java.lang.reflect.InvocationTargetException;
+
 public final class JavacPlugin implements Plugin {
 	private static final Object INIT_LOCK = new Object();
 	private static volatile boolean initialized;
@@ -18,11 +20,22 @@ public final class JavacPlugin implements Plugin {
 			if (initialized) return;
 			try {
 				Class.forName("java.lang.Module");
-				throw new UnsupportedOperationException("Not yet supported on Java 9+, internals changed");
+				invokeInit("java11");
 			} catch (ClassNotFoundException ignored) {
-				dev.xdark.betterrepeatable.java8.Initializer.init();
+				invokeInit("java8");
 				initialized = true;
 			}
+		}
+	}
+
+	private static void invokeInit(String pckg) {
+		try {
+			Class.forName("dev.xdark.betterrepeatable." + pckg + ".Initializer").getMethod("init")
+					.invoke(null);
+		} catch (InvocationTargetException | IllegalAccessException e) {
+			throw new RuntimeException("Failed to initialize", e);
+		} catch (ClassNotFoundException | NoSuchMethodException e) {
+			throw new RuntimeException("Cannot find initializer", e);
 		}
 	}
 }

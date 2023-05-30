@@ -1,6 +1,7 @@
 plugins {
     id 'java-gradle-plugin'
     id 'com.gradle.plugin-publish' version '1.2.0'
+    id 'signing'
 }
 
 java {
@@ -10,14 +11,11 @@ java {
 }
 
 dependencies {
-    shade asm
-    shade project(':better-repeatable-agent')
-    shade project(':better-repeatable-javac')
-    shade project(':better-repeatable-javac:java8')
+    shadeOnly project(':better-repeatable-javac')
 }
 
 jar {
-    from { configurations.shade.collect { zipTree(it) } }
+    from { configurations.shadeOnly.collect { zipTree(it) } }
 }
 
 gradlePlugin {
