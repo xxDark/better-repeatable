@@ -5,7 +5,22 @@ Once the compiler plugin sees any annotation that is marked with `dev.xdark.bett
 
 Primary purpose of change made better-repeatable is to be able to read annotations with ASM or any other bytecode framework in order they appear in source code, which is not possible with built-in `@Repeatable` annotation.
 
-## Breaking behaviour
+# Getting started
+Apply Gradle [plugin](https://plugins.gradle.org/plugin/dev.xdark.betterrepeatable):
+```groovy
+plugins {
+  id 'dev.xdark.betterrepeatable' version 'latest_version_here'
+}
+```
+Plugin will automatically include API dependency to `compileOnly` configuration.  
+If you want to disable such behaviour, set `usePluginAsDependency` to `false`:
+```groovy
+betterRepeatable {
+    usePluginAsDependency = false
+}
+```
+
+# Breaking behaviour
 
 With better-repeatable changes, built-in Java API to read annotations in places, where there are multiple annotations, will no longer work.  
 This is caused by code in `sun.reflect.AnnotationParser`:
